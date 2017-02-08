@@ -10,7 +10,7 @@
   },
   "devDependencies": {},
   "scripts": {
-    "test": "test"
+    "start": "node app.js"
   },
   "author": "Anton Matrosov",
   "license": "UNLICENSED"
