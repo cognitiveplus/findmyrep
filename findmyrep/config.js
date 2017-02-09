@@ -32,15 +32,17 @@ var config =
 };
 
 
-var data = Object.assign ({}, config);
+var data = JSON.parse (JSON.stringify (config));
 
 
 function update (newconfig)
 {
     if (!!newconfig)
-        data = Object.assign ({}, newconfig);
+        data = JSON.parse (JSON.stringify (newconfig));
     else
-        data = Object.assign ({}, config);
+        data = JSON.parse (JSON.stringify (config));
+        
+    module.exports.data = data;
 }
 
 

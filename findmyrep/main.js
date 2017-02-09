@@ -37,6 +37,22 @@ function handle (request, response)
 }
 
 
+function test (request, response)
+{
+    var result =
+    {
+        action: 'TEST',
+        resolvedQuery: '',
+        parameters:
+        {
+            state: 'Texas'
+        }
+    };
+    
+    handleFindSenators (result, response);
+}
+
+
 //-------------------------------------------------------------------------
 //                            ACTION HANDLERS
 //-------------------------------------------------------------------------
@@ -127,4 +143,4 @@ function createSenatorsReply (senators)
 }
 
 
-module.exports = {handle: handle};
+module.exports = {handle: handle, test: test};
