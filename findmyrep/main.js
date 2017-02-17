@@ -107,8 +107,9 @@ function handleError (response, error)
 //-------------------------------------------------------------------------
 
 
-function createSenatorCard (data)
+function createSenatorCard (senator)
 {
+    var data = JSON.parse (JSON.stringify (senator));
     data.phone = !!data.phone ? '+1' + data.phone.replace(/\D+/g, '') : '+1';
     return Utils.format (Config.data.template.senators.card, data);
 };
