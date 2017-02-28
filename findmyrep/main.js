@@ -61,9 +61,9 @@ function test (request, response)
 function handleFindSenators (result, response)
 {
     var state = Utils.getParameterValue (result, 'state');
-                    
-    if (!state)
-        state = Utils.getParameterValue (result, 'state1');
+    state = !!state ? state : Utils.getParameterValue (result, 'state1');
+    var firstname = Utils.getParameterValue (result, 'firstname');
+    var lastname = Utils.getParameterValue (result, 'lastname');
     
     if (!!state)
     {
@@ -86,9 +86,29 @@ function handleFindSenators (result, response)
             }
         });
     }
+    else if (!!firstname || !!lastname)
+    {
+        Database.getSenatorsByName (firstname, lastname, function (senators)
+        {
+            if (!!senators)
+            {
+                var text = 'Here are senators you were looking for:';
+                var message = Utils.createTextMessage (text);
+                var cards = createSenatorsReply (senators);
+                response.json (Utils.createFulfillment ([message, cards]));
+                Utils.log (namespace, result.action, result.resolvedQuery, message.speech);
+            }
+            else
+            {
+                var message = Utils.createTextMessage ('Oops, seems like there are no senators with that name!');
+                response.json (Utils.createFulfillment (message));
+                Utils.log (namespace, result.action, result.resolvedQuery, message.speech);
+            }
+        });
+    }
     else
     {
-        var message = Utils.createTextMessage ('Please provide valid state!');
+        var message = Utils.createTextMessage ('Please provide valid state or senator\'s name!');
         response.json (Utils.createFulfillment (message));
         Utils.log (namespace, result.action, result.resolvedQuery, message.speech);
     }
