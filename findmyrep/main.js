@@ -69,7 +69,7 @@ function handleFindSenators (result, response)
     {
         Database.getSenatorsByState (state, function (senators)
         {
-            if (!!senators)
+            if (!!senators && senators.length > 0)
             {
                 var params = senators[0] || {state_name: ''};
                 var text = Utils.format (Config.data.template.senators.text, params);
@@ -90,7 +90,7 @@ function handleFindSenators (result, response)
     {
         Database.getSenatorsByName (firstname, lastname, function (senators)
         {
-            if (!!senators)
+            if (!!senators && senators.length > 0)
             {
                 var text = 'Here are senators you were looking for:';
                 var message = Utils.createTextMessage (text);
