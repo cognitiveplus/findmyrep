@@ -1,6 +1,8 @@
-var Database = require ('./database.js');
-var Utils = require ('./utils.js');
 var Config = require ('./config.js');
+var Database = require ('./database.js');
+var Civic = require ('./civic.js');
+var Utils = require ('./utils.js');
+
 var namespace = 'findmyrep';
 
 
@@ -13,16 +15,18 @@ function handle (request, response)
 {
     try
     {
-        if (request.body && request.body.result && request.body.sessionId)
+        if (request.body && request.body.result)
         {
             var result = request.body.result;
-            var session = request.body.sessionId;
             
             switch (result.action)
             {
                 case 'senators.find':
                     handleFindSenators (result, response);
                     break;
+                    
+                case 'representatives.find':
+                    handleFindRepresentatives (result, response);
             }
         }
         else
@@ -45,11 +49,11 @@ function test (request, response)
         resolvedQuery: '',
         parameters:
         {
-            state: 'Texas'
+            address: '2166 Cuba Millington Road Millington TN 38053'
         }
     };
     
-    handleFindSenators (result, response);
+    handleFindRepresentatives (result, response);
 }
 
 
@@ -115,6 +119,39 @@ function handleFindSenators (result, response)
 }
 
 
+function handleFindRepresentatives (result, response)
+{
+    var address = Utils.getParameterValue (result, 'address');
+    
+    if (!!address)
+    {
+        Civic.getRepresentativesByAddress (address, function (representatives)
+        {
+            if (!!representatives && representatives.length > 0)
+            {
+                var text = 'Here are representatives in your administrative area:';
+                var message = Utils.createTextMessage (text);
+                var cards = createRepresentativesReply (representatives);
+                response.json (Utils.createFulfillment ([message, cards]));
+                Utils.log (namespace, result.action, result.resolvedQuery, message.speech);
+            }
+            else
+            {
+                var message = Utils.createTextMessage ('Oops, unfortunately we can\'t find representatives by provided address!');
+                response.json (Utils.createFulfillment (message));
+                Utils.log (namespace, result.action, result.resolvedQuery, message.speech);
+            }
+        });
+    }
+    else
+    {
+        var message = Utils.createTextMessage ('Please provide valid address!');
+        response.json (Utils.createFulfillment (message));
+        Utils.log (namespace, result.action, result.resolvedQuery, message.speech);
+    }
+}
+
+
 function handleError (response, error)
 {
     response.status(400).json ({status: {code: 400, errorType: error.message || error}});
@@ -159,6 +196,71 @@ function createSenatorsReply (senators)
         
     for (var senator of senators)
         message.payload.facebook.attachment.payload.elements.push (createSenatorCard (senator));
+            
+    return message;
+}
+
+
+function createRepresentativeCard (representative)
+{
+    var card = Utils.format
+    ({
+        title: "@name",
+        subtitle: "@party party",
+        image_url: "@photo",
+        buttons:
+        [
+            {
+                title: "Call this representative",
+                type: "phone_number",
+                payload: "@phone"
+            },
+            {
+                title: "Visit website",
+                type: "web_url",
+                url: "@website"
+            },
+            {
+                type: "element_share"
+            }
+        ]
+    },
+    {
+        name:       representative.name,
+        party:      representative.party,
+        photo:      representative.photoUrl,
+        phone:      (!!representative.phones && representative.phones.length > 0) ? '+1' + representative.phones[0].replace(/\D+/g, '') : '+1',
+        website:    (!!representative.urls && representative.urls.length > 0) ? representative.urls[0] : 'https://www.whitehouse.gov/'
+    });
+    
+    return card;
+}
+
+
+function createRepresentativesReply (representatives)
+{
+    var message =
+    {
+        payload:
+        {
+            facebook:
+            {
+                attachment:
+                {
+                    type: 'template',
+                    payload:
+                    {
+                        template_type: 'generic',
+                        elements: []
+                    }
+                }
+            }
+        },
+        type: 4
+    };
+        
+    for (var representative of representatives)
+        message.payload.facebook.attachment.payload.elements.push (createRepresentativeCard (representative));
             
     return message;
 }
