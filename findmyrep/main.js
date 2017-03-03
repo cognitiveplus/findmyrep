@@ -211,7 +211,7 @@ function createRepresentativeCard (representative)
         buttons:
         [
             {
-                title: "Call this representative",
+                title: "Call representative",
                 type: "phone_number",
                 payload: "@phone"
             },
