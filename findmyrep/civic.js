@@ -9,9 +9,9 @@ var levels = 'administrativeArea1';
 
 function getRepresentativesByAddress (address, callback)
 {
-    url = Utils.format (url, {key: key, address: address, levels: levels});
+    var endpoint = Utils.format (url, {key: key, address: address, levels: levels});
     
-    https.request (url, function (res)
+    https.get (endpoint, function (res)
     {
         var data = '';
         
@@ -29,8 +29,7 @@ function getRepresentativesByAddress (address, callback)
             else
                 callback (null);
         });
-    })
-    .end();
+    });
 }
 
 
