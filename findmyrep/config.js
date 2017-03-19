@@ -4,7 +4,7 @@ var config =
     {
         senators:
         {
-            text: "Here are senators from @state_name:",
+            text: "Here are the senators from @state_name:",
             card:
             {
                 title: "@title",
@@ -13,12 +13,12 @@ var config =
                 buttons:
                 [
                     {
-                        title: "Call senator",
-                        type: "phone_number",
-                        payload: "@phone"
+                        title: "Call this senator",
+                        type: "postback",
+                        payload: "Call @first_name @last_name"
                     },
                     {
-                        title: "Contact",
+                        title: "Contact via web",
                         type: "web_url",
                         url: "@contact"
                     },
@@ -26,6 +26,13 @@ var config =
                         type: "element_share"
                     }
                 ]
+            },
+            call_text: "Please select the office to call @first_name @last_name:",
+            call_button:
+            {
+                title: "@city, @state",
+                type: "phone_number",
+                payload: "@phone"
             }
         }
     }
@@ -37,12 +44,12 @@ var data = JSON.parse (JSON.stringify (config));
 
 function update (newconfig)
 {
-    if (!!newconfig)
+    /*if (!!newconfig)
         data = JSON.parse (JSON.stringify (newconfig));
     else
         data = JSON.parse (JSON.stringify (config));
         
-    module.exports.data = data;
+    module.exports.data = data;*/
 }
 
 

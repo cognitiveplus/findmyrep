@@ -18,6 +18,7 @@ function init ()
     database.ref ('members/').on ('value', function (snapshot)
     {
         var members = snapshot.val();
+        module.exports.members = members;
         data = {};
         
         if (!!members.length)

@@ -25,6 +25,10 @@ function handle (request, response)
                     handleFindSenators (result, response);
                     break;
                     
+                case 'senators.call':
+                    handleCallSenators (result, response);
+                    break;
+                    
                 case 'representatives.find':
                     handleFindRepresentatives (result, response);
             }
@@ -43,17 +47,7 @@ function handle (request, response)
 
 function test (request, response)
 {
-    var result =
-    {
-        action: 'TEST',
-        resolvedQuery: '',
-        parameters:
-        {
-            address: '2166 Cuba Millington Road Millington TN 38053'
-        }
-    };
-    
-    handleFindRepresentatives (result, response);
+    response.json (Database.members);
 }
 
 
@@ -115,6 +109,43 @@ function handleFindSenators (result, response)
         var message = Utils.createTextMessage ('Please provide valid state or senator\'s name!');
         response.json (Utils.createFulfillment (message));
         Utils.log (namespace, result.action, result.resolvedQuery, message.speech);
+    }
+}
+
+
+function handleCallSenators (result, response)
+{
+    var firstname = Utils.getParameterValue (result, 'firstname');
+    var lastname = Utils.getParameterValue (result, 'lastname');
+    
+    if (!!firstname || !!lastname)
+    {
+        Database.getSenatorsByName (firstname, lastname, function (senators)
+        {
+            if (!!senators && senators.length > 0)
+            {
+                var senator = senators[0];
+                
+                if (!!senator.offices)
+                {
+                    var message = createSenatorOfficesReply (senator);
+                    response.json (Utils.createFulfillment (message));
+                    Utils.log (namespace, result.action, result.resolvedQuery, message.speech);
+                }
+                else
+                {
+                    var message = Utils.createTextMessage ('Oops, can\'t find offices data for this senator!');
+                    response.json (Utils.createFulfillment (message));
+                    Utils.log (namespace, result.action, result.resolvedQuery, message.speech);
+                }
+            }
+            else
+            {
+                var message = Utils.createTextMessage ('Error: can\'t find senator with provided name');
+                response.json (Utils.createFulfillment (message));
+                Utils.log (namespace, result.action, result.resolvedQuery, message.speech);
+            }
+        });
     }
 }
 
@@ -196,6 +227,51 @@ function createSenatorsReply (senators)
         
     for (var senator of senators)
         message.payload.facebook.attachment.payload.elements.push (createSenatorCard (senator));
+            
+    return message;
+}
+
+
+function createCallButton (office)
+{
+    var data = JSON.parse (JSON.stringify (office));
+    data.phone = !!data.phone ? '+1' + data.phone.replace(/\D+/g, '') : '+1';
+    return Utils.format (Config.data.template.senators.call_button, data);
+}
+
+
+function createSenatorOfficesReply (senator)
+{
+    var message =
+    {
+        payload:
+        {
+            facebook:
+            {
+                attachment:
+                {
+                    type: 'template',
+                    payload:
+                    {
+                        template_type: 'button',
+                        text: Utils.format (Config.data.template.senators.call_text, senator),
+                        buttons: []
+                    }
+                }
+            }
+        },
+        type: 4
+    };
+    
+    var count = 0;
+    for (var id in senator.offices)
+    {
+        if (count < 3)
+        {
+            message.payload.facebook.attachment.payload.buttons.push (createCallButton (senator.offices[id]));
+            count++;
+        }
+    }
             
     return message;
 }
