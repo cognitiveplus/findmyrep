@@ -19,6 +19,7 @@ function init ()
     {
         var members = snapshot.val();
         module.exports.members = members;
+        
         data = {};
         
         if (!!members.length)
@@ -27,6 +28,36 @@ function init ()
         else
             for (var i in members)
                 process (members[i]);
+                
+        database.ref ('offices/').on ('value', function (snapshot)
+        {
+            var offices = snapshot.val().features;
+            module.exports.offices = offices;
+            
+            for (var office of offices)
+            {
+                var rep = office.properties.rep;
+                
+                if (rep.chamber === 'SENATE')
+                {
+                    for (var state in data)
+                    {
+                        for (var senator of data[state])
+                        {
+                            if (senator.first_name === rep.first_name && senator.last_name === rep.last_name)
+                            {
+                                office.properties.rep = null;
+                                
+                                senator.offices = senator.offices || [];
+                                senator.offices.push (office.properties);
+                            }
+                        }
+                    }
+                }
+            }
+            
+            module.exports.data = data;
+        });
     });
     
     database.ref ('config/').on ('value', function (snapshot)
@@ -43,7 +74,10 @@ function process (member)
     data[state] = data[state] || [];
     
     if (!!member.title && !!member.subtitle)
+    {
+        member.offices = [];
         data[state].push (member);
+    }
 }
 
 

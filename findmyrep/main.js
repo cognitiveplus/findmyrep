@@ -47,7 +47,7 @@ function handle (request, response)
 
 function test (request, response)
 {
-    response.json (Database.members);
+    response.json (Database.data);
 }
 
 
@@ -264,11 +264,11 @@ function createSenatorOfficesReply (senator)
     };
     
     var count = 0;
-    for (var id in senator.offices)
+    for (var office of senator.offices)
     {
         if (count < 3)
         {
-            message.payload.facebook.attachment.payload.buttons.push (createCallButton (senator.offices[id]));
+            message.payload.facebook.attachment.payload.buttons.push (createCallButton (office));
             count++;
         }
     }

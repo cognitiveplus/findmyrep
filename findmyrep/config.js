@@ -30,7 +30,7 @@ var config =
             call_text: "Please select the office to call @first_name @last_name:",
             call_button:
             {
-                title: "@city, @state",
+                title: "@city, @state_code",
                 type: "phone_number",
                 payload: "@phone"
             }
