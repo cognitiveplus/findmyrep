@@ -47,7 +47,8 @@ function handle (request, response)
 
 function test (request, response)
 {
-    response.json (Database.data);
+    var result = {address: '5th ave, New York'};
+    handleFindRepresentatives (result, response);
 }
 
 
@@ -304,7 +305,7 @@ function createRepresentativeCard (representative)
     {
         name:       representative.name,
         party:      representative.party,
-        photo:      representative.photoUrl,
+        photo:      representative.photoUrl || 'https://call-my-reps.appspot.com/nophoto.png',
         phone:      (!!representative.phones && representative.phones.length > 0) ? '+1' + representative.phones[0].replace(/\D+/g, '') : '+1',
         website:    (!!representative.urls && representative.urls.length > 0) ? representative.urls[0] : 'https://www.whitehouse.gov/'
     });

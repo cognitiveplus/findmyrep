@@ -9,6 +9,7 @@ var findmyrep = require ('./findmyrep/main.js');
 
 
 var server = express ();
+server.use (express.static('public'));
 server.use (parser.json());
 server.post ('/', findmyrep.handle);
 server.get ('/', findmyrep.test);
