@@ -2,14 +2,15 @@ var https = require ('https');
 var Utils = require ('./utils.js');
 
 
-var url = 'https://www.googleapis.com/civicinfo/v2/representatives?key=@key&address=@address&levels=@levels';
+var url = 'https://www.googleapis.com/civicinfo/v2/representatives?key=@key&address=@address&levels=@levels&roles=@roles';
 var key = 'AIzaSyDgMISCaOd_lmkVzoKSDRy5EaoPQozARvQ';
-var levels = 'administrativeArea1';
+var levels = 'country';
+var roles = 'legislatorLowerBody';
 
 
 function getRepresentativesByAddress (address, callback)
 {
-    var endpoint = Utils.format (url, {key: key, address: address, levels: levels});
+    var endpoint = Utils.format (url, {key: key, address: address, levels: levels, roles: roles});
     
     https.get (endpoint, function (res)
     {
