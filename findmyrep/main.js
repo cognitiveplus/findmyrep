@@ -31,6 +31,11 @@ function handle (request, response)
                     
                 case 'representatives.find':
                     handleFindRepresentatives (result, response);
+                    break;
+                    
+                case 'input.unknown':
+                    handleUnknownInput (result, response);
+                    break;
             }
         }
         else
@@ -47,8 +52,8 @@ function handle (request, response)
 
 function test (request, response)
 {
-    var result = {address: '5th ave, New York'};
-    handleFindRepresentatives (result, response);
+    var result = {parameters: {firstname: 'Kirsten E.', lastname: 'Gillibrand'}};
+    handleCallSenators (result, response);
 }
 
 
@@ -154,9 +159,14 @@ function handleCallSenators (result, response)
 function handleFindRepresentatives (result, response)
 {
     var address = Utils.getParameterValue (result, 'address');
+    var lat = Utils.getParameterValue (result, 'lat', 'facebook_location');
+    var long = Utils.getParameterValue (result, 'long', 'facebook_location');
     
-    if (!!address)
+    if (!!address || (!!lat && !!long))
     {
+        if (!address)
+            address = Utils.format ('@lat, @long', {lat: lat, long: long});
+        
         Civic.getRepresentativesByAddress (address, function (representatives)
         {
             if (!!representatives && representatives.length > 0)
@@ -181,6 +191,16 @@ function handleFindRepresentatives (result, response)
         response.json (Utils.createFulfillment (message));
         Utils.log (namespace, result.action, result.resolvedQuery, message.speech);
     }
+}
+
+
+function handleUnknownInput (result, response)
+{
+    var lat = Utils.getParameterValue (result, 'lat', 'facebook_location');
+    var long = Utils.getParameterValue (result, 'long', 'facebook_location');
+    
+    if (!!lat && !!long)
+        handleFindRepresentatives (result, response);
 }
 
 

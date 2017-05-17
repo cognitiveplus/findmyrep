@@ -1,0 +1,8 @@
+DIR=~/src/call-my-reps/block-the-vote-10
+git clone https://github.com/cognitiveplus/findmyrep.git $DIR
+cd $DIR
+npm install --production
+gcloud app deploy --project call-my-reps
+
+Problem fixing:
+gcloud config set app/use_appengine_api false
